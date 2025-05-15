@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/axios'; // this resolves to src/api/axios.ts
+import api from '../api/axios'; 
+import './Register.css'
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -41,6 +42,7 @@ const Register: React.FC = () => {
   };
 
   return (
+    <div className='registerDiv'>
     <form onSubmit={handleSubmit}>
       <h2>Register</h2>
       <input type="text" name="name" placeholder="Name" onChange={handleChange} required />
@@ -49,6 +51,7 @@ const Register: React.FC = () => {
       <input type="text" name="phoneNumber" placeholder="Phone Number" onChange={handleChange} required />
       <button type="submit">Register</button>
     </form>
+    </div>
   );
 };
 

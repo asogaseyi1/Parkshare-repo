@@ -1,10 +1,44 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-const Navbar = () => (
-  <nav style={{ padding: '1rem', backgroundColor: '#f8f8f8' }}>
-    <Link to="/login" style={{ marginRight: '1rem' }}>Login</Link>
-    <Link to="/register">Register</Link>
-  </nav>
-);
+const Navbar = () => {
+  const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem('token');
+
+  const buttonStyle = {
+    marginRight: '1rem',
+    padding: '0.5rem 1rem',
+    backgroundColor: '#4CAF50',
+    border: 'none',
+    color: 'white',
+    fontWeight: 'bold',
+    borderRadius: '5px',
+    cursor: 'pointer'
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    navigate('/');
+  };
+
+  return (
+    <nav style={{ padding: '1rem', backgroundColor: '#002366', color: 'white' }}>
+      {isLoggedIn ? (
+        <button onClick={handleLogout} style={buttonStyle}>
+          Logout
+        </button>
+      ) : (
+        <>
+          <button onClick={() => navigate('/login')} style={buttonStyle}>
+            Login
+          </button>
+          <button onClick={() => navigate('/register')} style={{ ...buttonStyle, marginRight: 0 }}>
+            Register
+          </button>
+        </>
+      )}
+    </nav>
+  );
+};
 
 export default Navbar;

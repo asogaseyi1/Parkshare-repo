@@ -17,7 +17,7 @@ public class ParkshareApplication {
 		SpringApplication.run(ParkshareApplication.class, args);
 	}
 
-	@Bean
+	/* @Bean
 	CommandLineRunner runner(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
 			User user = new User();
@@ -31,6 +31,6 @@ public class ParkshareApplication {
 
 			System.out.println("Sample user created: " + user.getEmail());
 		};
-	}
+	} */
 
 }

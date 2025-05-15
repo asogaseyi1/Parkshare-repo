@@ -3,7 +3,7 @@ import React from 'react';
 import NavBar from '../components/Navbar';
 
 const Dashboard: React.FC = () => {
-  const username = localStorage.getItem('userName') || 'Guest';
+  const username = localStorage.getItem('username') || 'Guest';
 
   return (
     <>

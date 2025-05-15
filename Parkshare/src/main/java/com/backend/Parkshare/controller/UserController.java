@@ -1,6 +1,7 @@
 package com.backend.Parkshare.controller;
 
 import com.backend.Parkshare.dto.LoginRequest;
+import com.backend.Parkshare.dto.LoginResponse;
 import com.backend.Parkshare.dto.RegisterRequest;
 import com.backend.Parkshare.repository.UserRepository;
 import com.backend.Parkshare.model.User;
@@ -53,6 +54,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
         }
         String token = jwtUtil.generateToken(user.getEmail());
-        return ResponseEntity.ok("Bearer " + token);
+        return ResponseEntity.ok(new LoginResponse("Bearer " + token, user.getName()));
     }
 }
