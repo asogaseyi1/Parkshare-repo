@@ -96,4 +96,44 @@ public class UserControllerTest {
         assertEquals(401, response.getStatusCodeValue());
         assertEquals("Invalid email or password.", response.getBody());
     }
+
+    @Test
+    void testRegisterWithNewUserReturnsSuccessMessage() {
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.name = "Alice";
+        registerRequest.email = "alice@example.com";
+        registerRequest.password = "securepassword";
+        registerRequest.phoneNumber = "1234567890";
+        registerRequest.roles = List.of("USER");
+
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(null);
+        when(passwordEncoder.encode("securepassword")).thenReturn("encodedPassword");
+
+        String result = userController.register(registerRequest);
+
+        assertEquals("User registered successfully.", result);
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void testRegisterWithExistingEmailReturnsUserAlreadyExistsMessage() {
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.name = "Bob";
+        registerRequest.email = "bob@example.com";
+        registerRequest.password = "password123";
+        registerRequest.phoneNumber = "9876543210";
+        registerRequest.roles = List.of("USER");
+
+        User existingUser = new User();
+        existingUser.setEmail("bob@example.com");
+
+        when(userRepository.findByEmail("bob@example.com")).thenReturn(existingUser);
+
+        String result = userController.register(registerRequest);
+
+        assertEquals("User already exists.", result);
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+
 }
