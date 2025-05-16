@@ -1,6 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 
-const Navbar = () => {
+interface NavbarProps {
+  backToDashboard?: boolean;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ backToDashboard = false }) => {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('token');
 
@@ -23,7 +27,11 @@ const Navbar = () => {
 
   return (
     <nav style={{ padding: '1rem', backgroundColor: '#002366', color: 'white' }}>
-      {isLoggedIn ? (
+      {backToDashboard ? (
+        <button onClick={() => navigate('/dashboard')} style={buttonStyle}>
+          Back to Dashboard
+        </button>
+      ) : isLoggedIn ? (
         <button onClick={handleLogout} style={buttonStyle}>
           Logout
         </button>
