@@ -1,4 +1,5 @@
 package com.backend.Parkshare.controller;
+
 import com.backend.Parkshare.dto.ParkingSpaceRequest;
 import com.backend.Parkshare.model.ParkingSpace;
 import com.backend.Parkshare.repository.ParkingSpaceRepository;
@@ -8,19 +9,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ParkingSpaceControllerIntegrationTest {
+
+    @Container
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0");
+
+    @DynamicPropertySource
+    static void overrideMongoProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,7 +59,7 @@ public class ParkingSpaceControllerIntegrationTest {
         request.setOwnerEmail("test@example.com");
         request.setTitle("Test Spot");
         request.setDescription("Great parking spot!");
-        request.setLocation(new org.springframework.data.mongodb.core.geo.GeoJsonPoint(-79.3832, 43.6532));
+        request.setLocation(new GeoJsonPoint(-79.3832, 43.6532));
         request.setPricePerHour(5.0);
         request.setAvailableFrom(LocalDateTime.now());
         request.setAvailableTo(LocalDateTime.now().plusDays(1));
@@ -59,7 +73,6 @@ public class ParkingSpaceControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        // Capture the created ID for other tests
         createdId = objectMapper.readTree(response).get("id").asText();
         Assertions.assertNotNull(createdId);
     }
@@ -67,17 +80,17 @@ public class ParkingSpaceControllerIntegrationTest {
     @Test
     @Order(2)
     public void testGetParkingSpaceById() throws Exception {
-        // First create the parking space directly in the DB
         ParkingSpace space = new ParkingSpace();
         space.setOwnerEmail("test@example.com");
         space.setTitle("Lookup Spot");
         space.setDescription("Find me!");
-        space.setLocation(new org.springframework.data.mongodb.core.geo.GeoJsonPoint(-79.3832, 43.6532));
+        space.setLocation(new GeoJsonPoint(-79.3832, 43.6532));
         space.setPricePerHour(4.0);
         space.setAvailableFrom(LocalDateTime.now());
         space.setAvailableTo(LocalDateTime.now().plusHours(3));
         space.setCreatedAt(LocalDateTime.now());
         space.setUpdatedAt(LocalDateTime.now());
+
         ParkingSpace saved = repository.save(space);
 
         mockMvc.perform(get("/api/parking-spaces/" + saved.getId()))
@@ -92,7 +105,7 @@ public class ParkingSpaceControllerIntegrationTest {
         space.setOwnerEmail("deleteme@example.com");
         space.setTitle("To Delete");
         space.setDescription("This one will be deleted");
-        space.setLocation(new org.springframework.data.mongodb.core.geo.GeoJsonPoint(-79.0, 43.0));
+        space.setLocation(new GeoJsonPoint(-79.0, 43.0));
         space.setPricePerHour(3.0);
         space.setAvailableFrom(LocalDateTime.now());
         space.setAvailableTo(LocalDateTime.now().plusHours(2));
