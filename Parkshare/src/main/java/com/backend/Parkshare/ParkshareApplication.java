@@ -1,5 +1,6 @@
 package com.backend.Parkshare;
 
+import com.backend.Parkshare.config.DotenvInitializer;
 import com.backend.Parkshare.model.User;
 import com.backend.Parkshare.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -14,23 +15,8 @@ import java.util.List;
 public class ParkshareApplication {
 
 	public static void main(String[] args) {
+		DotenvInitializer.init();
 		SpringApplication.run(ParkshareApplication.class, args);
 	}
-
-	/* @Bean
-	CommandLineRunner runner(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-		return args -> {
-			User user = new User();
-			user.setName("John Doe");
-			user.setEmail("john@example.com");
-			user.setPassword(passwordEncoder.encode("password123"));
-			user.setPhoneNumber("1234567890");
-			user.setRoles(List.of("USER"));
-
-			userRepository.save(user);
-
-			System.out.println("Sample user created: " + user.getEmail());
-		};
-	} */
 
 }

@@ -31,7 +31,7 @@ target/
 
 .idea
 *.iws
-*.iml
+*.iml   
 *.ipr
 
 /nbproject/private/
@@ -44,3 +44,6 @@ build/
 !**/src/test/**/build/
 
 .vscode/
+
+# Ignore backend environment variables
+*/.env
