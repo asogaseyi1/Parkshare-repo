@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps/api';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Listings.css';
 import Navbar from '../components/Navbar';
@@ -24,6 +25,9 @@ const ParkingListings: React.FC = () => {
       .then(res => setListings(res.data))
       .catch(err => console.error(err));
   }, []);
+
+  const navigate = useNavigate();
+
 
   // Initialize Places Autocomplete
   useEffect(() => {
@@ -97,7 +101,7 @@ const ParkingListings: React.FC = () => {
                 <p>Owner: {selected.ownerEmail}</p>
                 <button
                   className="reserve-button"
-                  onClick={() => alert(`Reserved: ${selected.title}`)}
+                  onClick={() => navigate(`/reserve/${selected.id}`)}
                 >
                   Reserve
                 </button>

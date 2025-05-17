@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateParkingSpace from './pages/CreateParkingSpace';
 import ParkingListings from './pages/ParkingListings';
+import ReservationPage from './pages/ReservationPage';
 
 const App: React.FC = () => {
   return (
@@ -18,6 +19,7 @@ const App: React.FC = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/create-parking" element={<CreateParkingSpace />} />
         <Route path="/listings" element={<ParkingListings />} />
+        <Route path="/reserve/:id" element={<ReservationPage />} />
       </Routes>
     </Router>
   );
