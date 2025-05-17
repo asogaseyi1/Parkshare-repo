@@ -40,6 +40,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
+    - name: Create dummy .env
+      working-directory: Parkshare
+      run: |
+        echo "STRIPE_SECRET_KEY=test_dummy_key" > .env
+
+
     - name: Build and test with Maven
       working-directory: Parkshare
       run: mvn --batch-mode clean install -Dspring.profiles.active=tes
