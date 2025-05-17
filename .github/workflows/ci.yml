@@ -48,7 +48,7 @@ jobs:
 
     - name: Build and test with Maven
       working-directory: Parkshare
-      run: mvn --batch-mode clean install -Dspring.profiles.active=tes
+      run: mvn --batch-mode clean install -Dspring.profiles.active=test
 
     - name: Show test failure reports
       if: failure()
