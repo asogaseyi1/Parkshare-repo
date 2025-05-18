@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API from '../api/axios';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import Navbar from '../components/Navbar';
 import './ReservationPage.css'
@@ -34,7 +35,7 @@ const ReservationPage: React.FC = () => {
   const elements = useElements();
 
   useEffect(() => {
-    axios.get(`http://localhost:8080/api/parking-spaces/${id}`)
+    API.get(`/api/parking-spaces/${id}`)
       .then(res => setSpace(res.data))
       .catch(err => console.error(err));
   }, [id]);
@@ -77,7 +78,7 @@ const ReservationPage: React.FC = () => {
     };
 
     try {
-      await axios.post('http://localhost:8080/api/reservations/create', payload);
+      await API.post('/api/reservations/create', payload);
       alert('Reservation created!');
       navigate('/dashboard');
     } catch (err: any) {

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API from '../api/axios';
 import './Listings.css';
 import Navbar from '../components/Navbar';
 
@@ -21,7 +22,7 @@ const ParkingListings: React.FC = () => {
   const mapRef = useRef<google.maps.Map | null>(null);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/parking-spaces')
+    API.get('/api/parking-spaces')
       .then(res => setListings(res.data))
       .catch(err => console.error(err));
   }, []);
