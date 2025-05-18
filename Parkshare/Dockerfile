@@ -9,8 +9,5 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
-# Set environment variables (optional)
-ENV PORT 8080
-
-EXPOSE 8080
+EXPOSE $PORT
 ENTRYPOINT ["java", "-jar", "app.jar"]
