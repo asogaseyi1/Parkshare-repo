@@ -14,7 +14,7 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**") // Allow all endpoints
                         .allowedOriginPatterns("http://localhost:3000")
-                        .allowedOriginPatterns("https://parkshare-frontend.vercel.app")
+                        .allowedOriginPatterns("https://parkshare-repo.vercel.app")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
