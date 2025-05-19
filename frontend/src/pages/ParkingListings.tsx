@@ -22,10 +22,16 @@ const ParkingListings: React.FC = () => {
   const mapRef = useRef<google.maps.Map | null>(null);
 
   useEffect(() => {
-    api.get('/parking-spaces')
-      .then(res => setListings(res.data))
-      .catch(err => console.error(err));
-  }, []);
+  api.get('/parking-spaces')
+    .then(res => {
+      const normalized = res.data.map((item: any) => ({
+        ...item,
+        id: item._id, // Add this line
+      }));
+      setListings(normalized);
+    })
+    .catch(err => console.error(err));
+}, []);
 
   const navigate = useNavigate();
 
@@ -102,7 +108,7 @@ const ParkingListings: React.FC = () => {
                 <p>Owner: {selected.ownerEmail}</p>
                 <button
                   className="reserve-button"
-                  onClick={() => navigate(`/reserve/${selected._id}`)}
+                  onClick={() => navigate(`/reserve/${selected.id}`)}
                 >
                   Reserve
                 </button>

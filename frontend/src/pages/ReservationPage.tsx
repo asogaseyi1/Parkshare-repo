@@ -22,7 +22,7 @@ const cardStyle = {
 
 const ReservationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  console.log("ReservePage: _id =", id);
+  console.log("ReservePage:id =", id);
   const navigate = useNavigate();
   const [space, setSpace] = useState<any>(null);
   const [startTime, setStartTime] = useState('');
