@@ -13,11 +13,10 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**") // Allow all endpoints
-                        .allowedOriginPatterns("http://localhost:3000")
-                        .allowedOriginPatterns("https://parkshare-repo.vercel.app")
+                        .allowedOriginPatterns("http://localhost:3000","https://parkshare-repo.vercel.app")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowCredentials(false);
             }
         };
     }

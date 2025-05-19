@@ -10,7 +10,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -18,16 +17,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())  // Disable CSRF for APIs
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for token-based auth
+                .cors(cors -> {}) // Enable CORS (handled by CorsConfig)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
-                .httpBasic(AbstractHttpConfigurer::disable);
-        // Use stateless session management
-        http.sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        );
+                .httpBasic(AbstractHttpConfigurer::disable) // Disable HTTP Basic Auth
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // JWT = stateless
+                );
         return http.build();
     }
 

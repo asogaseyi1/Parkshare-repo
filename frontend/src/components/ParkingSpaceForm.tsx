@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
-import API from '../api/axios';
+import api from '../api/axios';
 
 const ParkingSpaceForm: React.FC = () => {
   const { isLoaded, loadError } = useLoadScript({
@@ -43,7 +43,7 @@ const ParkingSpaceForm: React.FC = () => {
     if (!marker) return alert("Please select a location on the map.");
 
     try {
-      await API.post('/api/parking-spaces', {
+      await api.post('/parking-spaces', {
         ...form,
         pricePerHour: parseFloat(form.pricePerHour),
         location: { type: "Point", coordinates: [marker.lng, marker.lat] },
