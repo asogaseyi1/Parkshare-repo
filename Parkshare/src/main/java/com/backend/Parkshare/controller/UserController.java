@@ -24,7 +24,11 @@ public class UserController {
     @Autowired
     private JwtUtil jwtUtil;
 
-
+    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest req) {
         if (userRepository.findByEmail(req.email).isPresent()) {
