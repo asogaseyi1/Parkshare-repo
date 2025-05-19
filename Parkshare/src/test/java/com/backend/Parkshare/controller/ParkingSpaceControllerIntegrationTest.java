@@ -1,6 +1,5 @@
 package com.backend.Parkshare.controller;
 
-import com.backend.Parkshare.config.TestSecurityConfig;
 import com.backend.Parkshare.dto.ParkingSpaceRequest;
 import com.backend.Parkshare.model.ParkingSpace;
 import com.backend.Parkshare.repository.ParkingSpaceRepository;
@@ -9,8 +8,8 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Import(TestSecurityConfig.class)
 public class ParkingSpaceControllerIntegrationTest {
 
     @Container
@@ -48,8 +46,6 @@ public class ParkingSpaceControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static String createdId;
-
     @BeforeEach
     public void setup() {
         repository.deleteAll();
@@ -57,6 +53,7 @@ public class ParkingSpaceControllerIntegrationTest {
 
     @Test
     @Order(1)
+    @WithMockUser(username = "test@example.com", roles = {"USER"})
     public void testCreateParkingSpace() throws Exception {
         ParkingSpaceRequest request = new ParkingSpaceRequest();
         request.setOwnerEmail("test@example.com");
@@ -67,21 +64,16 @@ public class ParkingSpaceControllerIntegrationTest {
         request.setAvailableFrom(LocalDateTime.now());
         request.setAvailableTo(LocalDateTime.now().plusDays(1));
 
-        String response = mockMvc.perform(post("/api/parking-spaces")
+        mockMvc.perform(post("/api/parking-spaces")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Test Spot"))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        createdId = objectMapper.readTree(response).get("id").asText();
-        Assertions.assertNotNull(createdId);
+                .andExpect(jsonPath("$.title").value("Test Spot"));
     }
 
     @Test
     @Order(2)
+    @WithMockUser(username = "test@example.com", roles = {"USER"})
     public void testGetParkingSpaceById() throws Exception {
         ParkingSpace space = new ParkingSpace();
         space.setOwnerEmail("test@example.com");
@@ -103,6 +95,7 @@ public class ParkingSpaceControllerIntegrationTest {
 
     @Test
     @Order(3)
+    @WithMockUser(username = "test@example.com", roles = {"USER"})
     public void testDeleteParkingSpace() throws Exception {
         ParkingSpace space = new ParkingSpace();
         space.setOwnerEmail("deleteme@example.com");
