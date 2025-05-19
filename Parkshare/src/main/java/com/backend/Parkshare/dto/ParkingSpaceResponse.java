@@ -1,5 +1,6 @@
 package com.backend.Parkshare.dto;
 
+import com.backend.Parkshare.model.ParkingSpace;
 import lombok.Data;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
@@ -22,6 +23,22 @@ public class ParkingSpaceResponse {
 
     public ParkingSpaceResponse() {
     }
+
+    public static ParkingSpaceResponse fromEntity(ParkingSpace space) {
+        ParkingSpaceResponse dto = new ParkingSpaceResponse();
+        dto.setId(space.getId()); // Map the MongoDB _id
+        dto.setOwnerEmail(space.getOwnerEmail());
+        dto.setTitle(space.getTitle());
+        dto.setDescription(space.getDescription());
+        dto.setLocation(space.getLocation());
+        dto.setPricePerHour(space.getPricePerHour());
+        dto.setAvailableFrom(space.getAvailableFrom());
+        dto.setAvailableTo(space.getAvailableTo());
+        dto.setCreatedAt(space.getCreatedAt());
+        dto.setUpdatedAt(space.getUpdatedAt());
+        return dto;
+    }
+
 
     public String getOwnerEmail() {
         return ownerEmail;

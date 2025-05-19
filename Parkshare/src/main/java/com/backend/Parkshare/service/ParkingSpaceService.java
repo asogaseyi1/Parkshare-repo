@@ -38,9 +38,8 @@ public class ParkingSpaceService {
     }
 
     public List<ParkingSpaceResponse> getAllParkingSpaces() {
-        return repository.findAll()
-                .stream()
-                .map(this::toResponse)
+        return repository.findAll().stream()
+                .map(ParkingSpaceResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -52,8 +51,10 @@ public class ParkingSpaceService {
     }
 
     public Optional<ParkingSpaceResponse> getParkingSpaceById(String id) {
-        return repository.findById(id).map(this::toResponse);
+        return repository.findById(id)
+                .map(ParkingSpaceResponse::fromEntity); // This ensures `id` is not null
     }
+
 
     public ParkingSpaceResponse updateParkingSpace(String id, ParkingSpaceRequest request) {
         return repository.findById(id)
