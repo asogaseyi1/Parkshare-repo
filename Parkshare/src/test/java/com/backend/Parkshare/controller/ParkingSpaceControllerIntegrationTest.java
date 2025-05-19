@@ -1,5 +1,6 @@
 package com.backend.Parkshare.controller;
 
+import com.backend.Parkshare.config.TestSecurityConfig;
 import com.backend.Parkshare.dto.ParkingSpaceRequest;
 import com.backend.Parkshare.model.ParkingSpace;
 import com.backend.Parkshare.repository.ParkingSpaceRepository;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Import(TestSecurityConfig.class)
 public class ParkingSpaceControllerIntegrationTest {
 
     @Container
