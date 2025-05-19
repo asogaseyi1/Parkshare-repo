@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -45,7 +46,7 @@ public class UserControllerTest {
         req.phoneNumber = "1234567890";
         req.roles = List.of("USER");
 
-        when(userRepository.findByEmail("john@example.com")).thenReturn(null);
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("password")).thenReturn("encodedPwd");
 
         String result = userController.register(req);
@@ -65,7 +66,7 @@ public class UserControllerTest {
         user.setEmail("john@example.com");
         user.setPassword("encodedPassword");
 
-        when(userRepository.findByEmail("john@example.com")).thenReturn(user);
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password", "encodedPassword")).thenReturn(true);
         when(jwtUtil.generateToken("john@example.com")).thenReturn("mockedToken");
 
@@ -75,7 +76,6 @@ public class UserControllerTest {
         LoginResponse loginResponse = (LoginResponse) response.getBody();
         assertEquals("Bearer mockedToken", loginResponse.getToken());
         assertEquals("John Doe", loginResponse.getName());
-
     }
 
     @Test
@@ -88,7 +88,7 @@ public class UserControllerTest {
         user.setEmail("john@example.com");
         user.setPassword("encodedPassword");
 
-        when(userRepository.findByEmail("john@example.com")).thenReturn(user);
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrongpassword", "encodedPassword")).thenReturn(false);
 
         ResponseEntity<?> response = userController.login(loginRequest);
@@ -106,7 +106,7 @@ public class UserControllerTest {
         registerRequest.phoneNumber = "1234567890";
         registerRequest.roles = List.of("USER");
 
-        when(userRepository.findByEmail("alice@example.com")).thenReturn(null);
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("securepassword")).thenReturn("encodedPassword");
 
         String result = userController.register(registerRequest);
@@ -127,13 +127,11 @@ public class UserControllerTest {
         User existingUser = new User();
         existingUser.setEmail("bob@example.com");
 
-        when(userRepository.findByEmail("bob@example.com")).thenReturn(existingUser);
+        when(userRepository.findByEmail("bob@example.com")).thenReturn(Optional.of(existingUser));
 
         String result = userController.register(registerRequest);
 
         assertEquals("User already exists.", result);
         verify(userRepository, never()).save(any(User.class));
     }
-
-
 }
