@@ -49,11 +49,15 @@ public class UserController {
     // Login endpoint
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail());
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElse(null);
+
         if (user == null || !passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
         }
+
         String token = jwtUtil.generateToken(user.getEmail());
         return ResponseEntity.ok(new LoginResponse("Bearer " + token, user.getName()));
     }
+
 }
