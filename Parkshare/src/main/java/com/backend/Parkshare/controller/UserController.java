@@ -26,7 +26,10 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public String register(@RequestBody RegisterRequest req) {
+    public ResponseEntity<String> register(@RequestBody RegisterRequest req) {
+        if (userRepository.findByEmail(req.email).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists.");
+        }
 
         User user = new User();
         user.setName(req.name);
@@ -35,16 +38,10 @@ public class UserController {
         user.setPhoneNumber(req.phoneNumber);
         user.setRoles(req.roles);
 
-        System.out.println("Received name: " + user.getName());
-        System.out.println("Received email: " + user.getEmail());
-        System.out.println("Received password: " + user.getPassword());
-        if (userRepository.findByEmail(user.getEmail()) != null) {
-            return "User already exists.";
-        }
-
         userRepository.save(user);
-        return "User registered successfully.";
+        return ResponseEntity.ok("User registered successfully.");
     }
+
 
     // Login endpoint
     @PostMapping("/login")

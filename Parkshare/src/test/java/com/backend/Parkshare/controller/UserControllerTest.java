@@ -34,7 +34,7 @@ public class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        MockitoAnnotations.openMocks(this);  // Initializes @InjectMocks and @Mock
     }
 
     @Test
@@ -49,9 +49,10 @@ public class UserControllerTest {
         when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("password")).thenReturn("encodedPwd");
 
-        String result = userController.register(req);
+        ResponseEntity<String> response = userController.register(req);
 
-        assertEquals("User registered successfully.", result);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("User registered successfully.", response.getBody());
         verify(userRepository, times(1)).save(any(User.class));
     }
 
@@ -109,9 +110,10 @@ public class UserControllerTest {
         when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("securepassword")).thenReturn("encodedPassword");
 
-        String result = userController.register(registerRequest);
+        ResponseEntity<String> response = userController.register(registerRequest);
 
-        assertEquals("User registered successfully.", result);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("User registered successfully.", response.getBody());
         verify(userRepository, times(1)).save(any(User.class));
     }
 
@@ -129,9 +131,10 @@ public class UserControllerTest {
 
         when(userRepository.findByEmail("bob@example.com")).thenReturn(Optional.of(existingUser));
 
-        String result = userController.register(registerRequest);
+        ResponseEntity<String> response = userController.register(registerRequest);
 
-        assertEquals("User already exists.", result);
+        assertEquals(400, response.getStatusCodeValue());
+        assertEquals("User already exists.", response.getBody());
         verify(userRepository, never()).save(any(User.class));
     }
 }
