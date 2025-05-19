@@ -102,7 +102,7 @@ const ParkingListings: React.FC = () => {
                 <p>Owner: {selected.ownerEmail}</p>
                 <button
                   className="reserve-button"
-                  onClick={() => navigate(`/reserve/${selected.id}`)}
+                  onClick={() => navigate(`/reserve/${selected._id}`)}
                 >
                   Reserve
                 </button>
