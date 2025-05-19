@@ -24,6 +24,7 @@ const ParkingListings: React.FC = () => {
   useEffect(() => {
   api.get('/parking-spaces')
     .then(res => {
+      console.log("API Response:", res.data);
       const normalized = res.data.map((item: any) => ({
         ...item,
         id: item._id, // Add this line
@@ -108,7 +109,9 @@ const ParkingListings: React.FC = () => {
                 <p>Owner: {selected.ownerEmail}</p>
                 <button
                   className="reserve-button"
-                  onClick={() => navigate(`/reserve/${selected.id}`)}
+                  onClick={() =>{ 
+                    console.log("Selected parking space:", selected);
+                    navigate(`/reserve/${selected.id}`)}}
                 >
                   Reserve
                 </button>
