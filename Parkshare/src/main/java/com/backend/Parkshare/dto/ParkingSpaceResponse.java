@@ -1,12 +1,10 @@
 package com.backend.Parkshare.dto;
 
 import com.backend.Parkshare.model.ParkingSpace;
-import lombok.Data;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 import java.time.LocalDateTime;
 
-@Data
 public class ParkingSpaceResponse {
 
     private String id;
@@ -14,6 +12,7 @@ public class ParkingSpaceResponse {
     private String title;
     private String description;
     private GeoJsonPoint location;
+    private String country;
     private double pricePerHour;
     private LocalDateTime availableFrom;
     private LocalDateTime availableTo;
@@ -31,6 +30,7 @@ public class ParkingSpaceResponse {
         dto.setTitle(space.getTitle());
         dto.setDescription(space.getDescription());
         dto.setLocation(space.getLocation());
+        dto.setCountry(space.getCountry());
         dto.setPricePerHour(space.getPricePerHour());
         dto.setAvailableFrom(space.getAvailableFrom());
         dto.setAvailableTo(space.getAvailableTo());
@@ -70,6 +70,14 @@ public class ParkingSpaceResponse {
 
     public void setLocation(GeoJsonPoint location) {
         this.location = location;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public double getPricePerHour() {

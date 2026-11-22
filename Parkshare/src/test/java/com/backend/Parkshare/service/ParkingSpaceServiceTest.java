@@ -35,6 +35,7 @@ class ParkingSpaceServiceTest {
         request.setTitle("Test Title");
         request.setDescription("Test Description");
         request.setLocation(new GeoJsonPoint(-79.3832, 43.6532));
+        request.setCountry("CA");
         request.setPricePerHour(5.0);
         request.setAvailableFrom(LocalDateTime.of(2025, 1, 1, 8, 0));
         request.setAvailableTo(LocalDateTime.of(2025, 1, 1, 18, 0));
@@ -44,6 +45,7 @@ class ParkingSpaceServiceTest {
         parkingSpace.setTitle(request.getTitle());
         parkingSpace.setDescription(request.getDescription());
         parkingSpace.setLocation(request.getLocation());
+        parkingSpace.setCountry(request.getCountry());
         parkingSpace.setPricePerHour(request.getPricePerHour());
         parkingSpace.setAvailableFrom(request.getAvailableFrom());
         parkingSpace.setAvailableTo(request.getAvailableTo());

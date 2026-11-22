@@ -60,6 +60,7 @@ public class ParkingSpaceControllerIntegrationTest {
         request.setTitle("Test Spot");
         request.setDescription("Great parking spot!");
         request.setLocation(new GeoJsonPoint(-79.3832, 43.6532));
+        request.setCountry("CA");
         request.setPricePerHour(5.0);
         request.setAvailableFrom(LocalDateTime.now());
         request.setAvailableTo(LocalDateTime.now().plusDays(1));
@@ -80,6 +81,7 @@ public class ParkingSpaceControllerIntegrationTest {
         space.setTitle("Lookup Spot");
         space.setDescription("Find me!");
         space.setLocation(new GeoJsonPoint(-79.3832, 43.6532));
+        space.setCountry("CA");
         space.setPricePerHour(4.0);
         space.setAvailableFrom(LocalDateTime.now());
         space.setAvailableTo(LocalDateTime.now().plusHours(3));
@@ -102,6 +104,7 @@ public class ParkingSpaceControllerIntegrationTest {
         space.setTitle("To Delete");
         space.setDescription("This one will be deleted");
         space.setLocation(new GeoJsonPoint(-79.0, 43.0));
+        space.setCountry("CA");
         space.setPricePerHour(3.0);
         space.setAvailableFrom(LocalDateTime.now());
         space.setAvailableTo(LocalDateTime.now().plusHours(2));

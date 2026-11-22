@@ -10,7 +10,8 @@ export interface LoginRequest {
   password: string;
 }
 
+/** Mirrors com.backend.Parkshare.dto.LoginResponse — token is "Bearer <jwt>". */
 export interface LoginResponse {
   token: string;
-  message: string;
+  name: string;
 }

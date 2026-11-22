@@ -4,9 +4,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.mapping.Document;
-import lombok.Data;
 @Document(collection = "parkingSpaces")
-@Data
 public class ParkingSpace {
     @Id
     private String id;
@@ -14,6 +12,8 @@ public class ParkingSpace {
     private String title;
     private String description;
     private GeoJsonPoint location;
+    /** ISO 3166-1 alpha-2 code (e.g. "CA", "US") — drives currency and tax in PricingService. */
+    private String country;
     private double pricePerHour;
     private LocalDateTime availableFrom;
     private LocalDateTime availableTo;
@@ -53,6 +53,14 @@ public class ParkingSpace {
 
     public void setLocation(GeoJsonPoint location) {
         this.location = location;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public double getPricePerHour() {
@@ -97,5 +105,9 @@ public class ParkingSpace {
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

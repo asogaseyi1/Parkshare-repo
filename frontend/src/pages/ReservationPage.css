@@ -1,74 +1,268 @@
-.reservation-page {
-  display: flex;
-  flex-direction: column;
+/* ==========================================================================
+   Reservation / checkout
+   ========================================================================== */
+
+.reserve__back {
+  display: inline-flex;
   align-items: center;
-  padding: 40px 20px;
-  font-family: 'Arial', sans-serif;
-  min-height: 100vh;
-}
-
-.reservation-page h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.reservation-page p {
-  margin: 5px 0;
-  color: #555;
-}
-
-.reservation-page form {
-  background-color: #fff;
-  padding: 30px 40px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.reservation-page label {
-  display: flex;
-  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: #444;
+  color: var(--text-muted);
 }
 
-.reservation-page input[type="datetime-local"] {
-  margin-top: 5px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.reserve__back:hover { color: var(--primary); }
+.reserve__back svg { width: 1rem; height: 1rem; }
+
+.reserve .page-head { padding-top: 0.75rem; }
+
+.reserve__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 1.25rem;
 }
 
-.reservation-page .StripeElement {
-  margin-top: 10px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: white;
+.reserve__form { display: block; }
+
+/* --------------------------------------------------------------- duration */
+
+.reserve__duration {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  font-size: var(--text-sm);
+  color: var(--primary-soft-text);
+  background: var(--primary-soft);
+  border-radius: var(--radius-sm);
 }
 
-.reservation-page button {
-  padding: 12px;
-  font-size: 1rem;
-  background-color: #2d6a4f;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.reserve__duration svg { width: 1.05rem; height: 1.05rem; flex: none; }
+.reserve__duration strong { font-weight: 700; }
+
+/* ------------------------------------------------------------- card field */
+
+.reserve__card-field {
+  padding: 0.85rem 0.9rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
-.reservation-page button:hover {
-  background-color: #1b4332;
+.reserve__card-field:focus-within {
+  background: var(--surface);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-ring);
 }
 
-.reservation-page p[style*="color: red"] {
-  margin-top: -10px;
-  color: red !important;
-  font-weight: 500;
+.reserve__secure {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+}
+
+.reserve__secure svg { width: 0.95rem; height: 0.95rem; flex: none; }
+
+/* ----------------------------------------------------------------- summary */
+
+.reserve__aside {
+  position: sticky;
+  top: calc(var(--header-h) + 1.25rem);
+}
+
+.reserve__summary { display: grid; gap: 1rem; }
+
+.reserve__summary-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.reserve__summary-icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  color: #fff;
+  background: var(--grad-brand);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.reserve__summary-icon svg { width: 1.35rem; height: 1.35rem; }
+
+.reserve__summary-title {
+  font-size: var(--text-lg);
+  line-height: 1.25;
+}
+
+.reserve__summary-host {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.reserve__summary-host svg { width: 0.85rem; height: 0.85rem; flex: none; }
+
+.reserve__summary-desc {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.reserve__lines {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.reserve__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.reserve__line span:last-child {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.reserve__line--total {
+  margin-top: 0.35rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+  font-size: var(--text-base);
+  font-weight: 650;
+  color: var(--text);
+}
+
+.reserve__line--total span:last-child {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.reserve__assurances {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+
+.reserve__assurances li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.reserve__assurances svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------- fee transparency */
+
+.reserve__fee-note,
+.reserve__host-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+}
+
+.reserve__fee-note svg,
+.reserve__host-note svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: none;
+  margin-top: 0.1rem;
+  color: var(--text-subtle);
+}
+
+/* ------------------------------------------------------------- confirmation */
+
+.reserve__done {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  max-width: 34rem;
+  margin: clamp(2rem, 6vw, 3.5rem) auto;
+  text-align: center;
+  animation: pop-in var(--dur-slow) var(--ease-spring);
+}
+
+.reserve__done-icon {
+  display: grid;
+  place-items: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--success), #0b7a4d);
+  border-radius: 50%;
+  box-shadow: var(--shadow-md);
+}
+
+.reserve__done-icon svg { width: 2rem; height: 2rem; }
+
+.reserve__done-title { font-size: var(--text-3xl); }
+
+.reserve__receipt {
+  width: 100%;
+  margin: 1.5rem 0 0.5rem;
+  padding: 1.1rem 1.25rem;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.reserve__receipt .reserve__lines { padding-top: 0; border-top: none; }
+
+.reserve__done-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+/* ------------------------------------------------------------- breakpoints */
+
+@media (max-width: 960px) {
+  .reserve__layout { grid-template-columns: 1fr; }
+
+  .reserve__aside {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .reserve__done-actions .btn { width: 100%; }
 }

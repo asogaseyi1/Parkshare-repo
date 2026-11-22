@@ -6,6 +6,7 @@ import com.backend.Parkshare.dto.RegisterRequest;
 import com.backend.Parkshare.repository.UserRepository;
 import com.backend.Parkshare.model.User;
 import com.backend.Parkshare.util.JwtUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class UserController {
         this.jwtUtil = jwtUtil;
     }
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest req) {
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest req) {
         if (userRepository.findByEmail(req.email).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists.");
         }

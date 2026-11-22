@@ -1,12 +1,26 @@
 package com.backend.Parkshare.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
 public class ReservationRequest {
+    @NotBlank(message = "User email is required")
+    @Email(message = "Invalid email format")
     private String userEmail;
+
+    @NotBlank(message = "Parking space id is required")
     private String parkingSpaceId;
+
+    @NotNull(message = "Start time is required")
     private LocalDateTime startTime;
+
+    @NotNull(message = "End time is required")
     private LocalDateTime endTime;
+
+    @NotBlank(message = "Payment method is required")
     private String paymentMethodId;
 
     // Getters and setters

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -40,15 +41,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String jwt = authHeader.substring(7);
-            String userEmail = jwtUtil.extractEmail(jwt);
 
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-                if (jwtUtil.validateToken(jwt)) {
+            // Validate before extracting/looking up the user. extractEmail() parses the
+            // token and throws (ExpiredJwtException, MalformedJwtException, ...) on anything
+            // invalid; calling it first — as this used to — let an expired or tampered token
+            // crash the filter chain with an uncaught exception (a 500) on every request,
+            // instead of simply being treated as unauthenticated.
+            if (jwtUtil.validateToken(jwt) && SecurityContextHolder.getContext().getAuthentication() == null) {
+                try {
+                    String userEmail = jwtUtil.extractEmail(jwt);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                } catch (UsernameNotFoundException ex) {
+                    // Token is valid but the account it names is gone (e.g. deleted) —
+                    // proceed unauthenticated rather than crashing the request.
+                    SecurityContextHolder.clearContext();
                 }
             }
         }

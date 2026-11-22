@@ -1,12 +1,10 @@
 package com.backend.Parkshare.dto;
 
-import lombok.Data;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
-@Data
 public class ParkingSpaceRequest {
 
     @NotBlank(message = "Owner email is required")
@@ -20,6 +18,9 @@ public class ParkingSpaceRequest {
 
     @NotNull(message = "Location is required")
     private GeoJsonPoint location;
+
+    @NotBlank(message = "Country is required")
+    private String country;
 
     @Positive(message = "Price must be positive")
     private double pricePerHour;
@@ -61,6 +62,14 @@ public class ParkingSpaceRequest {
 
     public void setLocation(GeoJsonPoint location) {
         this.location = location;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public double getPricePerHour() {

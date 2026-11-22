@@ -20,6 +20,17 @@ public class Reservation {
     @DBRef
     private ParkingSpace parkingSpace;
 
+    // Airbnb-style breakdown, recorded at booking time so it reflects the
+    // rate/fees/tax actually charged even if those change later. All in the
+    // same currency; see PricingService.
+    private String currency;
+    private double baseAmount;
+    private double guestServiceFee;
+    private double tax;
+    private double totalCharged;
+    private double hostServiceFee;
+    private double hostPayout;
+
     // Getters and setters
 
     public String getId() {
@@ -68,5 +79,61 @@ public class Reservation {
 
     public void setParkingSpace(ParkingSpace parkingSpace) {
         this.parkingSpace = parkingSpace;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public double getBaseAmount() {
+        return baseAmount;
+    }
+
+    public void setBaseAmount(double baseAmount) {
+        this.baseAmount = baseAmount;
+    }
+
+    public double getGuestServiceFee() {
+        return guestServiceFee;
+    }
+
+    public void setGuestServiceFee(double guestServiceFee) {
+        this.guestServiceFee = guestServiceFee;
+    }
+
+    public double getTax() {
+        return tax;
+    }
+
+    public void setTax(double tax) {
+        this.tax = tax;
+    }
+
+    public double getTotalCharged() {
+        return totalCharged;
+    }
+
+    public void setTotalCharged(double totalCharged) {
+        this.totalCharged = totalCharged;
+    }
+
+    public double getHostServiceFee() {
+        return hostServiceFee;
+    }
+
+    public void setHostServiceFee(double hostServiceFee) {
+        this.hostServiceFee = hostServiceFee;
+    }
+
+    public double getHostPayout() {
+        return hostPayout;
+    }
+
+    public void setHostPayout(double hostPayout) {
+        this.hostPayout = hostPayout;
     }
 }

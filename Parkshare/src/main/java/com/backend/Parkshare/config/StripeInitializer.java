@@ -12,8 +12,13 @@ public class StripeInitializer {
 
     @PostConstruct
     public void init() {
+        // Looks for .env next to pom.xml — i.e. wherever the app is actually
+        // launched from (`mvnw spring-boot:run` or `java -jar target/*.jar`,
+        // both run with that as the working directory). A previous hardcoded
+        // "./Parkshare" assumed being launched one level up, so it silently
+        // never found the file when run the normal way.
         Dotenv dotenv = Dotenv.configure()
-                .directory("./Parkshare") // or simply `.load()` if .env is in root
+                .directory(".")
                 .ignoreIfMissing()
                 .load();
 

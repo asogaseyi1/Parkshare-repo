@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "ParkShare",
+  "name": "ParkShare — parking, shared",
+  "description": "Rent a driveway, garage or parking spot by the hour.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +21,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#5b45eb",
+  "background_color": "#f6f7fb"
 }
