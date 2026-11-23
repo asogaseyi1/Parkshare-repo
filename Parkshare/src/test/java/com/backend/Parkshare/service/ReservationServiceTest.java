@@ -3,7 +3,9 @@ package com.backend.Parkshare.service;
 import com.backend.Parkshare.dto.ReservationRequest;
 import com.backend.Parkshare.exception.BadRequestException;
 import com.backend.Parkshare.exception.ConflictException;
+import com.backend.Parkshare.exception.ForbiddenException;
 import com.backend.Parkshare.exception.NotFoundException;
+import com.backend.Parkshare.exception.PaymentException;
 import com.backend.Parkshare.model.ParkingSpace;
 import com.backend.Parkshare.model.Reservation;
 import com.backend.Parkshare.model.ReservationLock;
@@ -12,11 +14,15 @@ import com.backend.Parkshare.pricing.ResolvedRate;
 import com.backend.Parkshare.repository.ParkingSpaceRepository;
 import com.backend.Parkshare.repository.ReservationLockRepository;
 import com.backend.Parkshare.repository.ReservationRepository;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Refund;
+import com.stripe.param.RefundCreateParams;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
@@ -24,10 +30,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -189,5 +201,108 @@ class ReservationServiceTest {
         assertThrows(RuntimeException.class, () -> service.createReservation(request, AUTHENTICATED_EMAIL));
         verify(rateResolutionService).resolve("space-1", 10.0, AUTHENTICATED_EMAIL,
                 request.getStartTime(), request.getEndTime());
+    }
+
+    /* --------------------------------------------------------------- cancel -- */
+
+    private static Reservation futureReservation() {
+        Reservation reservation = new Reservation();
+        reservation.setId("res-1");
+        reservation.setUserEmail("driver@example.com");
+        reservation.setHostEmail("host@example.com");
+        reservation.setStartTime(LocalDateTime.now().plusDays(1));
+        reservation.setEndTime(LocalDateTime.now().plusDays(1).plusHours(2));
+        reservation.setStripePaymentIntentId("pi_test_123");
+        reservation.setTotalCharged(19.90);
+        return reservation;
+    }
+
+    @Test
+    void cancel_rejectsUnknownReservation() {
+        when(reservationRepo.findById("missing")).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> service.cancel("missing", "driver@example.com"));
+    }
+
+    @Test
+    void cancel_rejectsCallerWhoIsNeitherGuestNorHost() {
+        when(reservationRepo.findById("res-1")).thenReturn(Optional.of(futureReservation()));
+
+        assertThrows(ForbiddenException.class, () -> service.cancel("res-1", "stranger@example.com"));
+    }
+
+    @Test
+    void cancel_allowsTheHostAsWellAsTheGuest() {
+        Reservation reservation = futureReservation();
+        when(reservationRepo.findById("res-1")).thenReturn(Optional.of(reservation));
+
+        try (MockedStatic<Refund> refundStatic = mockStatic(Refund.class)) {
+            Refund refund = new Refund();
+            refund.setId("re_test_1");
+            refundStatic.when(() -> Refund.create(any(RefundCreateParams.class))).thenReturn(refund);
+            when(reservationRepo.save(any(Reservation.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            Reservation result = service.cancel("res-1", "host@example.com");
+
+            assertTrue(result.isCancelled());
+            assertEquals("host@example.com", result.getCancelledBy());
+        }
+    }
+
+    @Test
+    void cancel_rejectsAlreadyCancelledReservation() {
+        Reservation reservation = futureReservation();
+        reservation.setCancelled(true);
+        when(reservationRepo.findById("res-1")).thenReturn(Optional.of(reservation));
+
+        assertThrows(ConflictException.class, () -> service.cancel("res-1", "driver@example.com"));
+    }
+
+    @Test
+    void cancel_rejectsOnceTheReservationHasStarted() {
+        Reservation reservation = futureReservation();
+        reservation.setStartTime(LocalDateTime.now().minusMinutes(5));
+        when(reservationRepo.findById("res-1")).thenReturn(Optional.of(reservation));
+
+        assertThrows(BadRequestException.class, () -> service.cancel("res-1", "driver@example.com"));
+    }
+
+    @Test
+    void cancel_issuesAFullRefundAndMarksTheReservationCancelled() {
+        Reservation reservation = futureReservation();
+        when(reservationRepo.findById("res-1")).thenReturn(Optional.of(reservation));
+        when(reservationRepo.save(any(Reservation.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        try (MockedStatic<Refund> refundStatic = mockStatic(Refund.class)) {
+            Refund refund = new Refund();
+            refund.setId("re_test_2");
+            refundStatic.when(() -> Refund.create(any(RefundCreateParams.class))).thenReturn(refund);
+
+            Reservation result = service.cancel("res-1", "driver@example.com");
+
+            assertTrue(result.isCancelled());
+            assertEquals("re_test_2", result.getStripeRefundId());
+            assertEquals(19.90, result.getRefundAmount());
+            assertEquals("driver@example.com", result.getCancelledBy());
+
+            refundStatic.verify(() -> Refund.create(argThat((RefundCreateParams params) ->
+                    "pi_test_123".equals(params.getPaymentIntent()))));
+        }
+    }
+
+    @Test
+    void cancel_leavesReservationUncancelledWhenStripeRefundFails() {
+        Reservation reservation = futureReservation();
+        when(reservationRepo.findById("res-1")).thenReturn(Optional.of(reservation));
+
+        try (MockedStatic<Refund> refundStatic = mockStatic(Refund.class)) {
+            refundStatic.when(() -> Refund.create(any(RefundCreateParams.class)))
+                    .thenThrow(org.mockito.Mockito.mock(StripeException.class));
+
+            assertThrows(PaymentException.class, () -> service.cancel("res-1", "driver@example.com"));
+        }
+
+        assertFalse(reservation.isCancelled());
+        verify(reservationRepo, never()).save(any(Reservation.class));
     }
 }

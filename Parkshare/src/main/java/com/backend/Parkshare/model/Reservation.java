@@ -20,6 +20,21 @@ public class Reservation {
     @DBRef
     private ParkingSpace parkingSpace;
 
+    // Denormalized from parkingSpace.ownerEmail at booking time — lets the
+    // host side of cancel/list queries avoid chasing the DBRef. Same pattern
+    // Conversation uses for parkingSpaceTitle.
+    private String hostEmail;
+
+    // Set by ReservationService.createReservation once the Stripe charge
+    // succeeds — needed to issue a Refund later.
+    private String stripePaymentIntentId;
+
+    private boolean cancelled;
+    private LocalDateTime cancelledAt;
+    private String cancelledBy;
+    private String stripeRefundId;
+    private double refundAmount;
+
     // Airbnb-style breakdown, recorded at booking time so it reflects the
     // rate/fees/tax actually charged even if those change later. All in the
     // same currency; see PricingService.
@@ -165,5 +180,61 @@ public class Reservation {
 
     public void setDiscountPercent(double discountPercent) {
         this.discountPercent = discountPercent;
+    }
+
+    public String getHostEmail() {
+        return hostEmail;
+    }
+
+    public void setHostEmail(String hostEmail) {
+        this.hostEmail = hostEmail;
+    }
+
+    public String getStripePaymentIntentId() {
+        return stripePaymentIntentId;
+    }
+
+    public void setStripePaymentIntentId(String stripePaymentIntentId) {
+        this.stripePaymentIntentId = stripePaymentIntentId;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
+    }
+
+    public String getCancelledBy() {
+        return cancelledBy;
+    }
+
+    public void setCancelledBy(String cancelledBy) {
+        this.cancelledBy = cancelledBy;
+    }
+
+    public String getStripeRefundId() {
+        return stripeRefundId;
+    }
+
+    public void setStripeRefundId(String stripeRefundId) {
+        this.stripeRefundId = stripeRefundId;
+    }
+
+    public double getRefundAmount() {
+        return refundAmount;
+    }
+
+    public void setRefundAmount(double refundAmount) {
+        this.refundAmount = refundAmount;
     }
 }

@@ -4,6 +4,7 @@ import Logo from './Logo';
 import ThemeToggle from './ThemeToggle';
 import {
   IconArrowLeft,
+  IconCalendar,
   IconClose,
   IconLayers,
   IconLogout,
@@ -24,6 +25,7 @@ const links = [
   { to: '/dashboard', label: 'Dashboard', icon: <IconLayers /> },
   { to: '/listings', label: 'Find parking', icon: <IconMap /> },
   { to: '/create-parking', label: 'List a space', icon: <IconPlus /> },
+  { to: '/bookings', label: 'Bookings', icon: <IconCalendar /> },
   { to: '/messages', label: 'Messages', icon: <IconMessage /> },
 ];
 

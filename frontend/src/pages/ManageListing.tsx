@@ -235,7 +235,7 @@ const ManageListing: React.FC = () => {
         </header>
 
         <div className="manage-listing__grid">
-          {/* ---------------------------------------------------------- event rates */}
+          {/*  event rates */}
           <section className="card card-pad">
             <div className="form-section__head">
               <h2 className="form-section__title">
@@ -360,7 +360,7 @@ const ManageListing: React.FC = () => {
             </div>
           </section>
 
-          {/* ----------------------------------------------------------- discounts */}
+          {/*  discounts */}
           <section className="card card-pad">
             <div className="form-section__head">
               <h2 className="form-section__title">

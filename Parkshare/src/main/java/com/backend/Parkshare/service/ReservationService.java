@@ -3,6 +3,7 @@ package com.backend.Parkshare.service;
 import com.backend.Parkshare.dto.ReservationRequest;
 import com.backend.Parkshare.exception.BadRequestException;
 import com.backend.Parkshare.exception.ConflictException;
+import com.backend.Parkshare.exception.ForbiddenException;
 import com.backend.Parkshare.exception.NotFoundException;
 import com.backend.Parkshare.exception.PaymentException;
 import com.backend.Parkshare.model.ParkingSpace;
@@ -15,11 +16,14 @@ import com.backend.Parkshare.repository.ReservationLockRepository;
 import com.backend.Parkshare.repository.ReservationRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
+import com.stripe.model.Refund;
 import com.stripe.param.PaymentIntentCreateParams;
+import com.stripe.param.RefundCreateParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -113,6 +117,55 @@ public class ReservationService {
         }
 
         reservation.setPaid(true);
+        reservation.setStripePaymentIntentId(intent.getId());
+        return reservationRepo.save(reservation);
+    }
+
+    public List<Reservation> listForGuest(String guestEmail) {
+        return reservationRepo.findByUserEmailOrderByStartTimeDesc(guestEmail);
+    }
+
+    public List<Reservation> listForHost(String hostEmail) {
+        return reservationRepo.findByHostEmailOrderByStartTimeDesc(hostEmail);
+    }
+
+    /**
+     * Either side of a confirmed booking can cancel it for a full refund, as
+     * long as it hasn't started yet. No tiered refund policy yet — that's a
+     * deliberate follow-up, not forgotten here.
+     */
+    public Reservation cancel(String reservationId, String callerEmail) {
+        Reservation reservation = reservationRepo.findById(reservationId)
+                .orElseThrow(() -> new NotFoundException("Reservation not found"));
+
+        boolean isMember = reservation.getUserEmail().equalsIgnoreCase(callerEmail)
+                || (reservation.getHostEmail() != null && reservation.getHostEmail().equalsIgnoreCase(callerEmail));
+        if (!isMember) {
+            throw new ForbiddenException("You're not part of this reservation.");
+        }
+
+        if (reservation.isCancelled()) {
+            throw new ConflictException("This reservation is already cancelled.");
+        }
+
+        if (LocalDateTime.now().isAfter(reservation.getStartTime())) {
+            throw new BadRequestException("This reservation has already started and can no longer be cancelled.");
+        }
+
+        Refund refund;
+        try {
+            refund = Refund.create(RefundCreateParams.builder()
+                    .setPaymentIntent(reservation.getStripePaymentIntentId())
+                    .build());
+        } catch (StripeException e) {
+            throw new PaymentException("Refund failed: " + e.getMessage());
+        }
+
+        reservation.setCancelled(true);
+        reservation.setCancelledAt(LocalDateTime.now());
+        reservation.setCancelledBy(callerEmail);
+        reservation.setStripeRefundId(refund.getId());
+        reservation.setRefundAmount(reservation.getTotalCharged());
         return reservationRepo.save(reservation);
     }
 
@@ -143,6 +196,7 @@ public class ReservationService {
             reservation.setEndTime(request.getEndTime());
             reservation.setPaid(false);
             reservation.setParkingSpace(space);
+            reservation.setHostEmail(space.getOwnerEmail());
             reservation.setCurrency(pricing.currency());
             reservation.setBaseAmount(toDollars(pricing.baseCents()));
             reservation.setGuestServiceFee(toDollars(pricing.guestServiceFeeCents()));

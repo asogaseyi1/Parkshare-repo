@@ -1,0 +1,31 @@
+/* ==========================================================================
+   My Bookings — reuses Dashboard's .listing-row primitives
+   ========================================================================== */
+
+.booking-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+}
+
+.booking-row__end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex: none;
+}
+
+@media (max-width: 620px) {
+  .booking-row {
+    flex-wrap: wrap;
+  }
+
+  .booking-row__end {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}

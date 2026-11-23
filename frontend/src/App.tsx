@@ -10,6 +10,7 @@ import ManageListing from './pages/ManageListing';
 import ParkingListings from './pages/ParkingListings';
 import ReservationPage from './pages/ReservationPage';
 import Messages from './pages/Messages';
+import MyBookings from './pages/MyBookings';
 import Navbar from './components/Navbar';
 import { IconArrowLeft, IconMap } from './components/Icons';
 
@@ -54,6 +55,7 @@ const App: React.FC = () => {
         <Route path="/listings" element={<ParkingListings />} />
         <Route path="/reserve/:id" element={<ReservationPage />} />
         <Route path="/messages" element={<Messages />} />
+        <Route path="/bookings" element={<MyBookings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
