@@ -240,3 +240,37 @@ export const IconLayers: React.FC<IconProps> = (p) => (
     <path d="m4.5 12 7.5 3.9 7.5-3.9M4.5 16.1l7.5 3.9 7.5-3.9" />
   </Svg>
 );
+
+export const IconCalendar: React.FC<IconProps> = (p) => (
+  <Svg {...p}>
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2.4" />
+    <path d="M3.5 9.5h17M8 3v4M16 3v4" />
+    <path d="M7.8 13.3h2M11.8 13.3h2M15.8 13.3h2M7.8 16.8h2M11.8 16.8h2" />
+  </Svg>
+);
+
+export const IconTag: React.FC<IconProps> = (p) => (
+  <Svg {...p}>
+    <path d="M11.5 3.5H5.8a2.3 2.3 0 0 0-2.3 2.3v5.7c0 .6.24 1.2.67 1.63l9 9a2.3 2.3 0 0 0 3.26 0l5.03-5.03a2.3 2.3 0 0 0 0-3.26l-9-9a2.3 2.3 0 0 0-1.63-.67Z" />
+    <circle cx="8.2" cy="8.2" r="1.6" />
+  </Svg>
+);
+
+export const IconMessage: React.FC<IconProps> = (p) => (
+  <Svg {...p}>
+    <path d="M4 5.5h16a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1H9.8L5 20.8V17H4a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1Z" />
+  </Svg>
+);
+
+export const IconSend: React.FC<IconProps> = (p) => (
+  <Svg {...p}>
+    <path d="M21 3 10.5 13.5M21 3 14.5 21l-4-7.5L3 9.5 21 3Z" />
+  </Svg>
+);
+
+export const IconTrash: React.FC<IconProps> = (p) => (
+  <Svg {...p}>
+    <path d="M4.5 7h15M9.5 7V5.3a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3V7M18 7l-.8 12.1a2 2 0 0 1-2 1.9H8.8a2 2 0 0 1-2-1.9L6 7" />
+    <path d="M10.2 11v6M13.8 11v6" />
+  </Svg>
+);

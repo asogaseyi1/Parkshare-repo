@@ -9,6 +9,7 @@ import {
   IconLogout,
   IconMap,
   IconMenu,
+  IconMessage,
   IconPlus,
 } from './Icons';
 import { clearSession, getName, initialsOf, isLoggedIn } from '../lib/session';
@@ -23,6 +24,7 @@ const links = [
   { to: '/dashboard', label: 'Dashboard', icon: <IconLayers /> },
   { to: '/listings', label: 'Find parking', icon: <IconMap /> },
   { to: '/create-parking', label: 'List a space', icon: <IconPlus /> },
+  { to: '/messages', label: 'Messages', icon: <IconMessage /> },
 ];
 
 const Navbar: React.FC<NavbarProps> = ({ backToDashboard = false }) => {

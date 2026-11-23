@@ -8,6 +8,7 @@ import {
   IconAlert,
   IconArrowLeft,
   IconArrowRight,
+  IconCalendar,
   IconCar,
   IconCard,
   IconCheck,
@@ -16,8 +17,10 @@ import {
   IconInfo,
   IconLock,
   IconMail,
+  IconMessage,
   IconPin,
   IconShield,
+  IconTag,
   IconUser,
 } from '../components/Icons';
 import { getEmail } from '../lib/session';
@@ -50,6 +53,8 @@ interface ConfirmedReservation {
   tax: number;
   totalCharged: number;
   hostPayout: number;
+  specialRateName?: string | null;
+  discountPercent?: number;
 }
 
 const ReservationPage: React.FC = () => {
@@ -74,6 +79,9 @@ const ReservationPage: React.FC = () => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState<ConfirmedReservation | null>(null);
+
+  const [messaging, setMessaging] = useState(false);
+  const [messageError, setMessageError] = useState('');
 
   useEffect(() => {
     if (!id || id === 'undefined') {
@@ -131,6 +139,18 @@ const ReservationPage: React.FC = () => {
   }, [id, startTime, endTime, hours]);
 
   const currency = quote?.currency || 'CAD';
+
+  const handleMessageHost = () => {
+    if (!id) return;
+    setMessaging(true);
+    setMessageError('');
+
+    api
+      .post('/conversations', { parkingSpaceId: id })
+      .then((res) => navigate(`/messages?conversationId=${res.data.id}`))
+      .catch(() => setMessageError('Couldn’t start that conversation. Try again.'))
+      .finally(() => setMessaging(false));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,6 +260,22 @@ const ReservationPage: React.FC = () => {
             </p>
 
             <div className="reserve__receipt">
+              {(confirmed.specialRateName || (confirmed.discountPercent ?? 0) > 0) && (
+                <div className="row row-wrap" style={{ gap: '0.4rem', marginBottom: '0.9rem' }}>
+                  {confirmed.specialRateName && (
+                    <span className="badge badge-accent">
+                      <IconCalendar />
+                      Event pricing: {confirmed.specialRateName}
+                    </span>
+                  )}
+                  {(confirmed.discountPercent ?? 0) > 0 && (
+                    <span className="badge badge-success">
+                      <IconTag />
+                      {formatPercent(confirmed.discountPercent ?? 0)} discount applied
+                    </span>
+                  )}
+                </div>
+              )}
               <div className="reserve__line">
                 <span>{space.title} ({formatDuration(hours)})</span>
                 <span>{formatMoney(confirmed.baseAmount, confirmed.currency)}</span>
@@ -471,6 +507,25 @@ const ReservationPage: React.FC = () => {
                 </div>
               </div>
 
+              {space.ownerEmail?.toLowerCase() !== (getEmail() || '').toLowerCase() && (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm btn-block"
+                  onClick={handleMessageHost}
+                  disabled={messaging}
+                  style={{ marginBottom: '0.9rem' }}
+                >
+                  <IconMessage />
+                  {messaging ? 'Starting…' : 'Message host'}
+                </button>
+              )}
+              {messageError && (
+                <div className="alert alert-danger" role="alert" style={{ marginBottom: '0.9rem' }}>
+                  <IconAlert />
+                  <span>{messageError}</span>
+                </div>
+              )}
+
               {space.description && <p className="reserve__summary-desc">{space.description}</p>}
 
               {hours <= 0 ? (
@@ -492,9 +547,30 @@ const ReservationPage: React.FC = () => {
                 </div>
               ) : quote ? (
                 <>
+                  {(quote.specialRateName || (quote.discountPercent ?? 0) > 0) && (
+                    <div className="row row-wrap" style={{ gap: '0.4rem', marginBottom: '0.9rem' }}>
+                      {quote.specialRateName && (
+                        <span className="badge badge-accent">
+                          <IconCalendar />
+                          Event pricing: {quote.specialRateName}
+                        </span>
+                      )}
+                      {(quote.discountPercent ?? 0) > 0 && (
+                        <span className="badge badge-success">
+                          <IconTag />
+                          {formatPercent(quote.discountPercent ?? 0)} discount applied
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <div className="reserve__lines">
                     <div className="reserve__line">
                       <span>
+                        {quote.originalPricePerHour && quote.originalPricePerHour !== quote.pricePerHour && (
+                          <s className="text-muted" style={{ marginRight: '0.4rem' }}>
+                            {formatMoney(quote.originalPricePerHour, quote.currency)}
+                          </s>
+                        )}
                         {formatMoney(quote.pricePerHour, quote.currency)} × {formatDuration(quote.hours)}
                       </span>
                       <span>{formatMoney(quote.baseAmount, quote.currency)}</span>

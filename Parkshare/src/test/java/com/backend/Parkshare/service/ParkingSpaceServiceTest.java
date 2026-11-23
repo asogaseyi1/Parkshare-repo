@@ -2,8 +2,12 @@ package com.backend.Parkshare.service;
 
 import com.backend.Parkshare.dto.ParkingSpaceRequest;
 import com.backend.Parkshare.dto.ParkingSpaceResponse;
+import com.backend.Parkshare.exception.ForbiddenException;
+import com.backend.Parkshare.exception.NotFoundException;
 import com.backend.Parkshare.model.ParkingSpace;
 import com.backend.Parkshare.repository.ParkingSpaceRepository;
+import com.backend.Parkshare.repository.SpecialRateRepository;
+import com.backend.Parkshare.repository.UserDiscountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +25,12 @@ class ParkingSpaceServiceTest {
 
     @Mock
     private ParkingSpaceRepository repository;
+
+    @Mock
+    private SpecialRateRepository specialRateRepository;
+
+    @Mock
+    private UserDiscountRepository userDiscountRepository;
 
     @InjectMocks
     private ParkingSpaceService service;
@@ -154,5 +164,32 @@ class ParkingSpaceServiceTest {
         service.deleteParkingSpace("1");
 
         verify(repository, times(1)).deleteById("1");
+        // Removing a listing must not leave its event-rate/discount overrides
+        // orphaned, referencing a parkingSpaceId that no longer resolves.
+        verify(specialRateRepository, times(1)).deleteAllByParkingSpaceId("1");
+        verify(userDiscountRepository, times(1)).deleteAllByParkingSpaceId("1");
+    }
+
+    @Test
+    void requireOwnership_throwsNotFound_whenSpaceMissing() {
+        when(repository.findById("missing")).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> service.requireOwnership("missing", "owner@example.com"));
+    }
+
+    @Test
+    void requireOwnership_throwsForbidden_whenCallerIsNotOwner() {
+        when(repository.findById("1")).thenReturn(Optional.of(parkingSpace));
+
+        assertThrows(ForbiddenException.class, () -> service.requireOwnership("1", "someone-else@example.com"));
+    }
+
+    @Test
+    void requireOwnership_succeeds_whenCallerIsOwner() {
+        when(repository.findById("1")).thenReturn(Optional.of(parkingSpace));
+
+        ParkingSpace result = service.requireOwnership("1", "owner@example.com");
+
+        assertEquals(parkingSpace, result);
     }
 }

@@ -11,10 +11,12 @@ import {
   IconCar,
   IconClock,
   IconMap,
+  IconMessage,
   IconPin,
   IconSearch,
   IconUser,
 } from '../components/Icons';
+import { getEmail } from '../lib/session';
 import { formatDateTime, formatMoney } from '../lib/format';
 import { currencyForCountry, ParkingSpace } from '../types/ParkingSpace';
 import './Listings.css';
@@ -59,6 +61,7 @@ const formatDistance = (km: number) =>
 const ParkingListings: React.FC = () => {
   const { resolved } = useTheme();
   const navigate = useNavigate();
+  const myEmail = (getEmail() || '').toLowerCase();
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
@@ -149,6 +152,16 @@ const ParkingListings: React.FC = () => {
     if (pan && coords) mapRef.current?.panTo(coords);
     cardRefs.current[space.id]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, []);
+
+  const messageHost = useCallback(
+    (space: ParkingSpace) => {
+      api
+        .post('/conversations', { parkingSpaceId: space.id })
+        .then((res) => navigate(`/messages?conversationId=${res.data.id}`))
+        .catch(() => setFetchError('Couldn’t start that conversation. Try again.'));
+    },
+    [navigate]
+  );
 
   const priceRange = useMemo(() => {
     const prices = listings.map((space) => Number(space.pricePerHour) || 0).filter((p) => p > 0);
@@ -244,14 +257,25 @@ const ParkingListings: React.FC = () => {
                   {formatMoney(selected.pricePerHour, currencyForCountry(selected.country))}
                   <small>/hr</small>
                 </span>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={() => navigate(`/reserve/${selected.id}`)}
-                >
-                  Reserve
-                  <IconArrowRight />
-                </button>
+                <div className="row" style={{ gap: '0.4rem' }}>
+                  {selected.ownerEmail?.toLowerCase() !== myEmail && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => messageHost(selected)}
+                    >
+                      <IconMessage />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => navigate(`/reserve/${selected.id}`)}
+                  >
+                    Reserve
+                    <IconArrowRight />
+                  </button>
+                </div>
               </div>
             </div>
           </InfoWindow>
@@ -423,17 +447,32 @@ const ParkingListings: React.FC = () => {
                           <IconUser />
                           {space.ownerEmail}
                         </span>
-                        <button
-                          type="button"
-                          className="btn btn-primary btn-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/reserve/${space.id}`);
-                          }}
-                        >
-                          Reserve
-                          <IconArrowRight />
-                        </button>
+                        <div className="row" style={{ gap: '0.4rem' }}>
+                          {space.ownerEmail?.toLowerCase() !== myEmail && (
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                messageHost(space);
+                              }}
+                            >
+                              <IconMessage />
+                              Message
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/reserve/${space.id}`);
+                            }}
+                          >
+                            Reserve
+                            <IconArrowRight />
+                          </button>
+                        </div>
                       </div>
                     </article>
                   );

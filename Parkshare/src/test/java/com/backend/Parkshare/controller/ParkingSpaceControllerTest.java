@@ -4,8 +4,10 @@ import com.backend.Parkshare.dto.ParkingSpaceRequest;
 import com.backend.Parkshare.dto.ParkingSpaceResponse;
 import com.backend.Parkshare.dto.PriceBreakdown;
 import com.backend.Parkshare.exception.GlobalExceptionHandler;
+import com.backend.Parkshare.pricing.ResolvedRate;
 import com.backend.Parkshare.service.ParkingSpaceService;
 import com.backend.Parkshare.service.PricingService;
+import com.backend.Parkshare.service.RateResolutionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.data.mongodb.core.geo.GeoJsonModule;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -36,13 +39,16 @@ public class ParkingSpaceControllerTest {
     private MockMvc mockMvc;
     private ParkingSpaceService mockService;
     private PricingService mockPricingService;
+    private RateResolutionService mockRateResolutionService;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         this.mockService = mock(ParkingSpaceService.class);
         this.mockPricingService = mock(PricingService.class);
-        ParkingSpaceController controller = new ParkingSpaceController(mockService, mockPricingService);
+        this.mockRateResolutionService = mock(RateResolutionService.class);
+        ParkingSpaceController controller =
+                new ParkingSpaceController(mockService, mockPricingService, mockRateResolutionService);
 
         // Plain ObjectMapper(), unlike Spring's auto-configured one, has neither the
         // JSR-310 module (for LocalDateTime) nor Spring Data Mongo's GeoJsonModule
@@ -152,12 +158,15 @@ public class ParkingSpaceControllerTest {
         space.setPricePerHour(5.0);
         space.setCountry("CA");
         when(mockService.getParkingSpaceById("abc")).thenReturn(Optional.of(space));
+        when(mockRateResolutionService.resolve(eq("abc"), eq(5.0), eq("guest@example.com"), any(), any()))
+                .thenReturn(new ResolvedRate(5.0, 5.0, null, 0));
 
         PriceBreakdown quote = new PriceBreakdown();
         quote.setTotalCharged(11.80);
         when(mockPricingService.quote(eq(5.0), eq("CA"), any(), any())).thenReturn(quote);
 
         mockMvc.perform(get("/api/parking-spaces/abc/price-quote")
+                        .principal(new UsernamePasswordAuthenticationToken("guest@example.com", null))
                         .param("startTime", "2026-01-01T09:00:00")
                         .param("endTime", "2026-01-01T11:00:00"))
                 .andExpect(status().isOk())

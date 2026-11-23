@@ -6,8 +6,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateParkingSpace from './pages/CreateParkingSpace';
+import ManageListing from './pages/ManageListing';
 import ParkingListings from './pages/ParkingListings';
 import ReservationPage from './pages/ReservationPage';
+import Messages from './pages/Messages';
 import Navbar from './components/Navbar';
 import { IconArrowLeft, IconMap } from './components/Icons';
 
@@ -48,8 +50,10 @@ const App: React.FC = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/create-parking" element={<CreateParkingSpace />} />
+        <Route path="/listings/:id/manage" element={<ManageListing />} />
         <Route path="/listings" element={<ParkingListings />} />
         <Route path="/reserve/:id" element={<ReservationPage />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

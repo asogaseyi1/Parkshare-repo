@@ -6,6 +6,7 @@ import api from '../api/axios';
 import {
   IconAlert,
   IconArrowRight,
+  IconCalendar,
   IconClock,
   IconLayers,
   IconList,
@@ -268,6 +269,10 @@ const Dashboard: React.FC = () => {
                     {formatMoney(space.pricePerHour, currencyForCountry(space.country))}
                     <small>/hr</small>
                   </span>
+                  <Link to={`/listings/${space.id}/manage`} className="btn btn-ghost btn-sm">
+                    <IconCalendar />
+                    Manage
+                  </Link>
                 </article>
               ))}
             </div>

@@ -12,6 +12,13 @@ public class PriceBreakdown {
     private String countryCode;
     private double pricePerHour;
 
+    // Set only when a host-entered event rate and/or a standing per-guest
+    // discount applied (see RateResolutionService) — null/zero otherwise, so
+    // the frontend can tell a normal quote from an overridden one.
+    private double originalPricePerHour;
+    private String specialRateName;
+    private double discountPercent;
+
     private double baseAmount;
 
     private double guestServiceFeeRate;
@@ -56,6 +63,30 @@ public class PriceBreakdown {
 
     public void setPricePerHour(double pricePerHour) {
         this.pricePerHour = pricePerHour;
+    }
+
+    public double getOriginalPricePerHour() {
+        return originalPricePerHour;
+    }
+
+    public void setOriginalPricePerHour(double originalPricePerHour) {
+        this.originalPricePerHour = originalPricePerHour;
+    }
+
+    public String getSpecialRateName() {
+        return specialRateName;
+    }
+
+    public void setSpecialRateName(String specialRateName) {
+        this.specialRateName = specialRateName;
+    }
+
+    public double getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(double discountPercent) {
+        this.discountPercent = discountPercent;
     }
 
     public double getBaseAmount() {

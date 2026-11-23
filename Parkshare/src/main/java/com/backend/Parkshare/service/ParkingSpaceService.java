@@ -3,10 +3,13 @@ package com.backend.Parkshare.service;
 import com.backend.Parkshare.dto.ParkingSpaceRequest;
 import com.backend.Parkshare.dto.ParkingSpaceResponse;
 import com.backend.Parkshare.exception.BadRequestException;
+import com.backend.Parkshare.exception.ForbiddenException;
 import com.backend.Parkshare.exception.NotFoundException;
 import com.backend.Parkshare.model.ParkingSpace;
 import com.backend.Parkshare.pricing.CountryTaxRegistry;
 import com.backend.Parkshare.repository.ParkingSpaceRepository;
+import com.backend.Parkshare.repository.SpecialRateRepository;
+import com.backend.Parkshare.repository.UserDiscountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
@@ -19,9 +22,14 @@ import java.util.stream.Collectors;
 public class ParkingSpaceService {
 
     private final ParkingSpaceRepository repository;
+    private final SpecialRateRepository specialRateRepository;
+    private final UserDiscountRepository userDiscountRepository;
 
-    public ParkingSpaceService(ParkingSpaceRepository repository) {
+    public ParkingSpaceService(ParkingSpaceRepository repository, SpecialRateRepository specialRateRepository,
+                                UserDiscountRepository userDiscountRepository) {
         this.repository = repository;
+        this.specialRateRepository = specialRateRepository;
+        this.userDiscountRepository = userDiscountRepository;
     }
 
     public ParkingSpaceResponse createParkingSpace(ParkingSpaceRequest request) {
@@ -80,7 +88,26 @@ public class ParkingSpaceService {
     }
 
     public void deleteParkingSpace(String id) {
+        // Removing a listing shouldn't leave its event-rate/discount overrides
+        // orphaned and referencing a parkingSpaceId that no longer resolves.
+        specialRateRepository.deleteAllByParkingSpaceId(id);
+        userDiscountRepository.deleteAllByParkingSpaceId(id);
         repository.deleteById(id);
+    }
+
+    /** Loads the space or 404s — for endpoints any authenticated user may call. */
+    public ParkingSpace requireExists(String parkingSpaceId) {
+        return repository.findById(parkingSpaceId)
+                .orElseThrow(() -> new NotFoundException("Parking space not found"));
+    }
+
+    /** Loads the space, 404s if missing, 403s if the caller isn't its owner. */
+    public ParkingSpace requireOwnership(String parkingSpaceId, String callerEmail) {
+        ParkingSpace space = requireExists(parkingSpaceId);
+        if (callerEmail == null || !space.getOwnerEmail().equalsIgnoreCase(callerEmail)) {
+            throw new ForbiddenException("You don't own this listing.");
+        }
+        return space;
     }
 
     /** Fail fast at listing time rather than at a guest's quote/booking time. */

@@ -9,6 +9,7 @@ import com.backend.Parkshare.model.ParkingSpace;
 import com.backend.Parkshare.model.Reservation;
 import com.backend.Parkshare.model.ReservationLock;
 import com.backend.Parkshare.pricing.PriceBreakdownCents;
+import com.backend.Parkshare.pricing.ResolvedRate;
 import com.backend.Parkshare.repository.ParkingSpaceRepository;
 import com.backend.Parkshare.repository.ReservationLockRepository;
 import com.backend.Parkshare.repository.ReservationRepository;
@@ -46,7 +47,19 @@ public class ReservationService {
     @Autowired
     private PricingService pricingService;
 
-    public Reservation createReservation(ReservationRequest request) {
+    @Autowired
+    private RateResolutionService rateResolutionService;
+
+    /**
+     * @param authenticatedEmail the caller's own identity (from the JWT), used
+     *                           ONLY to resolve a per-guest discount. request's
+     *                           own userEmail still drives who the reservation
+     *                           is recorded under, same as before — otherwise
+     *                           anyone could set a different user's email in
+     *                           the request body and book at THEIR discounted
+     *                           rate.
+     */
+    public Reservation createReservation(ReservationRequest request, String authenticatedEmail) {
         if (!request.getEndTime().isAfter(request.getStartTime())) {
             throw new BadRequestException("End time must be after start time.");
         }
@@ -54,11 +67,16 @@ public class ReservationService {
         ParkingSpace space = parkingSpaceRepo.findById(request.getParkingSpaceId())
                 .orElseThrow(() -> new NotFoundException("Parking space not found"));
 
+        // Resolves a host-entered event rate and/or the caller's standing
+        // discount for this listing before pricing is computed at all.
+        ResolvedRate resolved = rateResolutionService.resolve(space.getId(), space.getPricePerHour(),
+                authenticatedEmail, request.getStartTime(), request.getEndTime());
+
         // The guest is charged base + ParkShare's guest service fee + tax; the
         // host later nets base - ParkShare's smaller host service fee. See
         // PricingService for the Airbnb-style math.
         PriceBreakdownCents pricing = pricingService.quoteCents(
-                space.getPricePerHour(), space.getCountry(), request.getStartTime(), request.getEndTime());
+                resolved.effectivePricePerHour(), space.getCountry(), request.getStartTime(), request.getEndTime());
 
         if (pricing.totalChargedCents() < MIN_CHARGE_CENTS) {
             throw new BadRequestException("This booking's total is below the minimum chargeable amount.");
@@ -69,7 +87,7 @@ public class ReservationService {
         // Without this, two concurrent requests for an overlapping window could
         // both pass the conflict check before either had saved, double-booking
         // the space. See ReservationLock.
-        Reservation reservation = claimSlot(request, space, pricing);
+        Reservation reservation = claimSlot(request, space, pricing, resolved);
 
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(pricing.totalChargedCents())
@@ -108,7 +126,8 @@ public class ReservationService {
      * expire). A scheduled sweep for stale paid=false reservations would close
      * that gap — not built yet, flagging it as a known follow-up.
      */
-    private Reservation claimSlot(ReservationRequest request, ParkingSpace space, PriceBreakdownCents pricing) {
+    private Reservation claimSlot(ReservationRequest request, ParkingSpace space, PriceBreakdownCents pricing,
+                                   ResolvedRate resolved) {
         acquireLock(request.getParkingSpaceId());
         try {
             List<Reservation> conflicts = reservationRepo.findByParkingSpaceIdAndTimeRange(
@@ -131,6 +150,9 @@ public class ReservationService {
             reservation.setTotalCharged(toDollars(pricing.totalChargedCents()));
             reservation.setHostServiceFee(toDollars(pricing.hostServiceFeeCents()));
             reservation.setHostPayout(toDollars(pricing.hostPayoutCents()));
+            reservation.setOriginalPricePerHour(resolved.originalPricePerHour());
+            reservation.setSpecialRateName(resolved.specialRateName());
+            reservation.setDiscountPercent(resolved.discountPercent());
 
             return reservationRepo.save(reservation);
         } finally {

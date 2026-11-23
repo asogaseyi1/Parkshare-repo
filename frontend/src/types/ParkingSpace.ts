@@ -63,6 +63,10 @@ export interface PriceBreakdown {
   currency: string;
   countryCode: string;
   pricePerHour: number;
+  /** Set only when a host event rate and/or standing discount applied — see RateResolutionService. */
+  originalPricePerHour?: number;
+  specialRateName?: string | null;
+  discountPercent?: number;
   baseAmount: number;
   guestServiceFeeRate: number;
   guestServiceFee: number;
@@ -72,4 +76,38 @@ export interface PriceBreakdown {
   hostServiceFeeRate: number;
   hostServiceFee: number;
   hostPayout: number;
+}
+
+/** A host-entered rate override for one listing over a specific event window. */
+export interface SpecialRate {
+  id: string;
+  parkingSpaceId: string;
+  ownerEmail: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  pricePerHour: number;
+  createdAt: string;
+}
+
+export interface SpecialRateRequest {
+  name: string;
+  startTime: string;
+  endTime: string;
+  pricePerHour: number;
+}
+
+/** A standing per-guest discount a host has granted on one listing. */
+export interface UserDiscount {
+  id: string;
+  parkingSpaceId: string;
+  ownerEmail: string;
+  guestEmail: string;
+  percentOff: number;
+  createdAt: string;
+}
+
+export interface UserDiscountRequest {
+  guestEmail: string;
+  percentOff: number;
 }

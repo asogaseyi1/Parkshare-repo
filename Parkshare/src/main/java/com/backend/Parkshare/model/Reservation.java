@@ -31,6 +31,12 @@ public class Reservation {
     private double hostServiceFee;
     private double hostPayout;
 
+    // Set only if a host-entered event rate and/or a standing per-guest
+    // discount applied to this booking — see RateResolutionService.
+    private double originalPricePerHour;
+    private String specialRateName;
+    private double discountPercent;
+
     // Getters and setters
 
     public String getId() {
@@ -135,5 +141,29 @@ public class Reservation {
 
     public void setHostPayout(double hostPayout) {
         this.hostPayout = hostPayout;
+    }
+
+    public double getOriginalPricePerHour() {
+        return originalPricePerHour;
+    }
+
+    public void setOriginalPricePerHour(double originalPricePerHour) {
+        this.originalPricePerHour = originalPricePerHour;
+    }
+
+    public String getSpecialRateName() {
+        return specialRateName;
+    }
+
+    public void setSpecialRateName(String specialRateName) {
+        this.specialRateName = specialRateName;
+    }
+
+    public double getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(double discountPercent) {
+        this.discountPercent = discountPercent;
     }
 }
