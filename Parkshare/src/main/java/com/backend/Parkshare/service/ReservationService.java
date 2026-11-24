@@ -93,12 +93,19 @@ public class ReservationService {
         // the space. See ReservationLock.
         Reservation reservation = claimSlot(request, space, pricing, resolved);
 
+        // Card only: this flow confirms synchronously with no return_url, so any
+        // redirect-based method Stripe might otherwise auto-enable (iDEAL, etc.)
+        // would fail outright. Restricting to "card" keeps every booking resolved
+        // in this one request/response.
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(pricing.totalChargedCents())
                 .setCurrency(pricing.currency().toLowerCase())
                 .setPaymentMethod(request.getPaymentMethodId())
+                .setAutomaticPaymentMethods(PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
+                        .setEnabled(true)
+                        .setAllowRedirects(PaymentIntentCreateParams.AutomaticPaymentMethods.AllowRedirects.NEVER)
+                        .build())
                 .setConfirm(true)
-                .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.AUTOMATIC)
                 .build();
 
         PaymentIntent intent;
